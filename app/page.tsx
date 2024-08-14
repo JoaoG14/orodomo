@@ -8,20 +8,20 @@ const CustomPopup: React.FC<{
 }> = ({ onConfirm, onCancel }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded shadow-lg text-center">
-        <p className="mb-4">Are you sure you want to stop the focus timer?</p>
+      <div className="bg-[#262626] font-bold p-6 rounded-lg w-80 shadow-lg text-center">
+        <p className="mb-4 text-white text-xl">Are you sure you want to stop your focus time?</p>
         <div className="flex justify-center space-x-4">
           <button
-            className="bg-green-500 text-white px-4 py-2 rounded"
+            className="bg-[#Fa3e01] text-[#FFD8CC] px-6 py-2 rounded-full"
             onClick={onConfirm}
           >
-            Yes
+            Stop
           </button>
           <button
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="text-[#858585] px-4 py-2 "
             onClick={onCancel}
           >
-            No
+            Keep going
           </button>
         </div>
       </div>
@@ -116,7 +116,7 @@ const Home: React.FC = () => {
   return (
     <main className="bg-black font-poppins  flex min-h-screen flex-col items-center text-center p-24">
       <div className="bg-[#262626] mt-36 px-2 items-center text-center align-middle justify-around w-48 h-12 rounded-full flex">
-        <p className={`${isResting ? `text-[#858585]` : `text-[#FFD8CC]`} text-[#FFD8CC] font-bold z-10 cursor-default`}>Focus</p>
+        <p className={`${isResting ? `text-[#858585]` : `text-[#FFD8CC]`} font-bold z-10 cursor-default`}>Focus</p>
         <p className={`${isResting ? `text-[#FFD8CC]` : `text-[#858585]`} font-bold z-10 cursor-default`}>Rest</p>
         <div className={`bg-[#FA3E01] h-9 rounded-full  absolute ${isResting ? `ml-[96px] w-20` : `mr-[82px] w-24`} block -2 z-0`}></div>
       </div>
