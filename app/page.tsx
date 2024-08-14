@@ -1,8 +1,11 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 
-const CustomPopup: React.FC<{ onConfirm: () => void; onCancel: () => void }> = ({ onConfirm, onCancel }) => {
+const CustomPopup: React.FC<{
+  onConfirm: () => void;
+  onCancel: () => void;
+}> = ({ onConfirm, onCancel }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded shadow-lg text-center">
@@ -30,8 +33,11 @@ const Home: React.FC = () => {
   const [focusTime, setFocusTime] = useState<number>(0);
   const [restTime, setRestTime] = useState<number>(0);
   const [isFocusing, setIsFocusing] = useState<boolean>(false);
-  const [focusInterval, setFocusInterval] = useState<NodeJS.Timeout | null>(null);
+  const [focusInterval, setFocusInterval] = useState<NodeJS.Timeout | null>(
+    null
+  );
   const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [isResting, setIsResting] = useState<boolean>(false);
 
   const formatTime = (time: number): string => {
     const minutes = String(Math.floor(time / 60)).padStart(2, "0");
@@ -41,6 +47,7 @@ const Home: React.FC = () => {
 
   const startFocus = () => {
     setIsFocusing(true);
+    setIsResting(false);
     setFocusInterval(
       setInterval(() => {
         setFocusTime((prevFocusTime) => {
@@ -57,6 +64,23 @@ const Home: React.FC = () => {
       clearInterval(focusInterval);
     }
     setIsFocusing(false);
+    setIsResting(true);
+    setFocusTime(0);
+  };
+
+  const startRest = () => {
+    setFocusInterval(
+      setInterval(() => {
+        setRestTime((prevRestTime) => {
+          if (prevRestTime <= 0) {
+            clearInterval(focusInterval!);
+            setIsResting(false);
+            return 0;
+          }
+          return prevRestTime - 1;
+        });
+      }, 1000)
+    );
   };
 
   const handleClick = () => {
@@ -73,6 +97,7 @@ const Home: React.FC = () => {
   const handleConfirm = () => {
     stopFocus();
     setShowPopup(false);
+    startRest();
   };
 
   const handleCancel = () => {
@@ -98,24 +123,29 @@ const Home: React.FC = () => {
 
       <div
         id="mainTimer"
-        className="text-white text-8xl text-center font-extrabold m-4"
+        className={`text-center text-8xl font-extrabold m-4 ${
+          isResting ? "text-[#FA3E01]" : "text-white"
+        }`}
       >
-        {formatTime(focusTime)}
+        {formatTime(isResting ? restTime : focusTime)}
       </div>
 
-      <p className="text-[#828282] font-bold">
-        Your <span className="text-[#fA3E01]">rest</span> time will be:
-      </p>
-      <p id="restTimer" className="text-[#Fa3e01] font-extrabold py-3">
-        {formatTime(restTime)}
-      </p>
-
-      <button
-        className="text-[#ffd8cc] bg-[#fa3e01] rounded-full p-4 px-28 font-bold"
-        onClick={handleClick}
-      >
-        {isFocusing ? "Stop Focus" : "Start Focus"}
-      </button>
+      {!isResting && (
+        <>
+          <p className="text-[#828282] font-bold">
+            Your <span className="text-[#fA3E01]">rest</span> time will be:
+          </p>
+          <p id="restTimer" className="text-[#Fa3e01] font-extrabold py-3">
+            {formatTime(restTime)}
+          </p>
+          <button
+            className="text-[#ffd8cc] bg-[#fa3e01] rounded-full p-4 px-24 font-bold"
+            onClick={handleClick}
+          >
+            {isFocusing ? "Stop Focus" : "Start Focus"}
+          </button>
+        </>
+      )}
 
       {showPopup && (
         <CustomPopup onConfirm={handleConfirm} onCancel={handleCancel} />
