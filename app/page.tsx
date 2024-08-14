@@ -114,27 +114,28 @@ const Home: React.FC = () => {
   }, [focusInterval]);
 
   return (
-    <main className="bg-black font-poppins flex min-h-screen flex-col items-center text-center p-24">
-      <div className="bg-[#262626] px-2 items-center text-center align-middle justify-around w-48 h-12 rounded-full flex">
-        <p className="text-[#FFD8CC] font-bold z-10 cursor-default">Focus</p>
-        <p className="text-[#858585] font-bold z-10 cursor-default">Rest</p>
-        <div className="bg-[#FA3E01] h-9 rounded-full w-24 absolute mr-[82px] block -2 z-0"></div>
+    <main className="bg-black font-poppins  flex min-h-screen flex-col items-center text-center p-24">
+      <div className="bg-[#262626] mt-36 px-2 items-center text-center align-middle justify-around w-48 h-12 rounded-full flex">
+        <p className={`${isResting ? `text-[#858585]` : `text-[#FFD8CC]`} text-[#FFD8CC] font-bold z-10 cursor-default`}>Focus</p>
+        <p className={`${isResting ? `text-[#FFD8CC]` : `text-[#858585]`} font-bold z-10 cursor-default`}>Rest</p>
+        <div className={`bg-[#FA3E01] h-9 rounded-full  absolute ${isResting ? `ml-[96px] w-20` : `mr-[82px] w-24`} block -2 z-0`}></div>
       </div>
 
       <div
         id="mainTimer"
-        className={`text-center text-8xl font-extrabold m-4 ${
-          isResting ? "text-[#FA3E01]" : "text-white"
-        }`}
+        className="text-center text-8xl font-extrabold m-4 text-white"
       >
         {formatTime(isResting ? restTime : focusTime)}
       </div>
 
+      {isResting ? (
+        <p className="text-[#828282] font-bold">Enjoy your resting time</p>
+      ) : (
+        <p className="text-[#828282] font-bold">Your rest time will be:</p>
+      )}
+
       {!isResting && (
         <>
-          <p className="text-[#828282] font-bold">
-            Your <span className="text-[#fA3E01]">rest</span> time will be:
-          </p>
           <p id="restTimer" className="text-[#Fa3e01] font-extrabold py-3">
             {formatTime(restTime)}
           </p>
