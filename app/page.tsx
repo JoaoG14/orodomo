@@ -66,6 +66,7 @@ const Home: React.FC = () => {
         }
         audioStop = true;
         setIsResting(false);
+        alert("Your resting time is over!"); // Alerta de fim do tempo de descanso
       }
     }
   };
