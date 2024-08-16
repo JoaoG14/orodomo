@@ -32,13 +32,13 @@ const Home: React.FC = () => {
   const [focusTime, setFocusTime] = useState<number>(0);
   const [restTime, setRestTime] = useState<number>(0);
   const [isFocusing, setIsFocusing] = useState<boolean>(false);
-  const [focusInterval, setFocusInterval] = useState<NodeJS.Timeout | null>(
-    null
-  );
+  const [focusStartTime, setFocusStartTime] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [isResting, setIsResting] = useState<boolean>(false);
+  const [restStartTime, setRestStartTime] = useState<number | null>(null);
+  const [totalRestTime, setTotalRestTime] = useState<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  let audioStop: boolean = false
+  let audioStop: boolean = false;
 
   const formatTime = (time: number): string => {
     const minutes = String(Math.floor(time / 60)).padStart(2, "0");
@@ -46,83 +46,84 @@ const Home: React.FC = () => {
     return `${minutes}:${seconds}`;
   };
 
+  const updateFocusTime = () => {
+    if (focusStartTime) {
+      const elapsed = Math.floor((Date.now() - focusStartTime) / 1000);
+      setFocusTime(elapsed);
+      setRestTime(Math.floor(elapsed / 4));
+    }
+  };
+
+  const updateRestTime = () => {
+    if (restStartTime) {
+      const elapsed = Math.floor((Date.now() - restStartTime) / 1000);
+      const remaining = Math.max(0, totalRestTime - elapsed);
+      setRestTime(remaining);
+
+      if (remaining === 0 && audioStop === false) {
+        if (audioRef.current) {
+          audioRef.current.play();
+        }
+        audioStop = true;
+        setIsResting(false);
+      }
+    }
+  };
+
   const startFocus = () => {
     setIsFocusing(true);
     setIsResting(false);
-    setFocusInterval(
-      setInterval(() => {
-        setFocusTime((prevFocusTime) => {
-          const newFocusTime = prevFocusTime + 1;
-          setRestTime(Math.floor(newFocusTime / 4));
-          return newFocusTime;
-        });
-      }, 1000)
-    );
+    setFocusStartTime(Date.now());
   };
 
   const stopFocus = () => {
-    if (focusInterval) {
-      clearInterval(focusInterval);
-    }
     setIsFocusing(false);
     setIsResting(true);
+    setFocusStartTime(null);
+    setTotalRestTime(Math.floor(focusTime / 4));
+    setRestStartTime(Date.now());
     setFocusTime(0);
-  };
-
-  const startRest = () => {
-    setFocusInterval(
-      setInterval(() => {
-        setRestTime((prevRestTime) => {
-          if (prevRestTime === 0 && audioStop === false) {
-            if (audioRef.current) {
-              audioRef.current.play();
-            }
-            audioStop = true
-          }
-          if (prevRestTime <= 0) {
-            clearInterval(focusInterval!);
-            setIsResting(false);
-            return 0;
-          }
-          return prevRestTime - 1;
-        });
-      }, 1000)
-    );
   };
 
   const handleClick = () => {
     if (isFocusing) {
       setShowPopup(true);
-      if (focusInterval) {
-        clearInterval(focusInterval);
-      }
     } else {
       startFocus();
       if (audioRef.current) {
         audioRef.current.play();
       }
-      audioStop = false
+      audioStop = false;
     }
   };
 
   const handleConfirm = () => {
     stopFocus();
     setShowPopup(false);
-    startRest();
   };
 
   const handleCancel = () => {
     setShowPopup(false);
-    startFocus(); // Restart the timer if canceled
+    startFocus();
   };
 
   useEffect(() => {
+    let focusTimer: NodeJS.Timeout | null = null;
+    let restTimer: NodeJS.Timeout | null = null;
+
+    if (isFocusing) {
+      focusTimer = setInterval(updateFocusTime, 1000);
+    }
+
+    if (isResting) {
+      restTimer = setInterval(updateRestTime, 1000);
+    }
+
     return () => {
-      if (focusInterval) {
-        clearInterval(focusInterval);
-      }
+      if (focusTimer) clearInterval(focusTimer);
+      if (restTimer) clearInterval(restTimer);
     };
-  }, [focusInterval]);
+  }, [isFocusing, isResting, focusStartTime, restStartTime]);
 
   return (
     <main className="bg-black font-poppins  flex min-h-screen flex-col items-center text-center p-24">
@@ -167,7 +168,9 @@ const Home: React.FC = () => {
             {formatTime(restTime)}
           </p>
           <button
-            className={` ${isFocusing ? `text-[#858585] bg-[#262626]` : `text-[#ffd8cc] bg-[#fa3e01]`} rounded-full p-4 px-24 font-bold`}
+            className={`${
+              isFocusing ? `text-[#858585] bg-[#262626]` : `text-[#ffd8cc] bg-[#fa3e01]`
+            } rounded-full p-4 px-24 font-bold`}
             onClick={handleClick}
           >
             {isFocusing ? "Stop Focus" : "Start Focus"}
