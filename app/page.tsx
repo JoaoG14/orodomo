@@ -90,11 +90,11 @@ const Home: React.FC = () => {
     if (isFocusing) {
       setShowPopup(true);
     } else {
+      audioStop = false;
       startFocus();
       if (audioRef.current) {
         audioRef.current.play();
       }
-      audioStop = false;
     }
   };
 
@@ -170,7 +170,9 @@ const Home: React.FC = () => {
           </p>
           <button
             className={`${
-              isFocusing ? `text-[#858585] bg-[#262626]` : `text-[#ffd8cc] bg-[#fa3e01]`
+              isFocusing
+                ? `text-[#858585] bg-[#262626]`
+                : `text-[#ffd8cc] bg-[#fa3e01]`
             } rounded-full p-4 px-24 font-bold`}
             onClick={handleClick}
           >
